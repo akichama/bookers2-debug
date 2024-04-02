@@ -2,6 +2,10 @@ class User < ApplicationRecord
   has_many :books, dependent: :destroy
   has_many :favorites, dependent: :destroy
   has_many :book_comments, dependent: :destroy
+  has_many :active_relationships, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
+  has_many :passive_relationships, class_name: "Relationship", foreign_key: "followed_id", despendent: :destory
+  has_many :folloings, through: :active_relationships, source: :follwed
+  has_many :followers, through: :passsive_relationships, source: :follower
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -21,4 +25,17 @@ class User < ApplicationRecord
     end
     profile_image.variant(resize_to_limit: [width, height]).processed
   end
+  
+  def follow(user)
+    active_relationships.create(followed_id: user.id)
+  end
+  
+  def unfollow(user)
+    active_relationships.find_by(followed_id: user_id).destroy
+  end
+  
+  def follwing?(uesr)
+    followings.include?(ser)
+  end
+  
 end
