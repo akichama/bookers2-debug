@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
-  before_action :authenticate_user!, only: [:index, :show, :edit]
+  before_action :authenticate_user!
+  before_action :ensure_correct_user, only: [:edit, :update]
 
   def show
     @user = User.find(params[:id])
@@ -8,23 +9,14 @@ class UsersController < ApplicationController
   end
 
   def index
-    @user = User.find(current_user.id)
     @users = User.all
+    @book = Book.new
   end
 
   def edit
-     @user = User.find(params[:id])
-     
-    if @user == current_user
-      render :edit
-    else
-      redirect_to user_path(current_user.id)
-    end
   end
 
   def update
-    is_matching_login_user
-    @user = User.find(params[:id])
     if @user.update(user_params)
       redirect_to user_path(@user), notice: "You have updated user successfully."
     else
@@ -42,13 +34,6 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
     unless @user == current_user
       redirect_to user_path(current_user)
-    end
-  end
-  
-  def is_matching_login_user
-    user = User.find(params[:id])
-    unless user.id == current_user.id
-      redirect_to post_images_path
     end
   end
 end
